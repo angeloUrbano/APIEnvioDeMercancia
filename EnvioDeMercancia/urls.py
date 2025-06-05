@@ -15,10 +15,26 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path , include
+from EnvioDeMercancia.Apps.User.API.views.viewsUser import Login , Logout
 
 
+
+from rest_framework_simplejwt.views import (
+
+    TokenObtainPairView,
+    TokenRefreshView,
+)
 
 urlpatterns = [
+    #admin path
     path('admin/', admin.site.urls),
+
+    #users path
     path('Users/',include("EnvioDeMercancia.Apps.User.API.routers")),
+    path('Login/', Login.as_view() , name ="login"),
+    path('Logout/', Logout.as_view() , name = "logout" ),
+
+    #token jwt path
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ]

@@ -1,5 +1,9 @@
 from abc import ABC, abstractmethod
 
+#DJANGO
+from django.utils import timezone
+from django.contrib.sessions.models import Session
+
 """
     Acceso a los datos
 
@@ -22,7 +26,46 @@ class RepositorioUsarioLectura(ABC):
         pass
 
 
-class RepositorioSQL(RepositorioUsarioEscritura , RepositorioUsarioLectura ):
+class RepositorioUsarioLecturaLogout(ABC):
+    @abstractmethod
+    def get_user(self , model ,  userid ):
+        pass
+
+class SessionRepository(ABC):
+    @abstractmethod
+    def clear_sessions(self, user):
+        pass   
+
+ 
+
+
+
+
+
+
+
+
+#this class handle logout querys
+class RepositorioSQLogout(RepositorioUsarioLecturaLogout):
+
+    def get_user(self , model , userid):
+        try:
+            query = model.objects.filter(id = userid).first()
+            return query
+        except:
+            return None
+    
+class DjangoSessionRepository(SessionRepository):   
+    def clear_sessions(self , user):
+        all_session = Session.objects.filter(expire_date__gte= timezone.now())
+        for session in all_session:
+            session_data = session.get_decoded()
+            if str(session_data.get('_auth_user_id'))==str(user.first().id ):
+                session.delete()
+      
+
+#this class handle user querys
+class RepositorioSQLUser(RepositorioUsarioEscritura , RepositorioUsarioLectura ):
 
     def DeleteUserRepositori(self  , modelo ,  pk):
         try:

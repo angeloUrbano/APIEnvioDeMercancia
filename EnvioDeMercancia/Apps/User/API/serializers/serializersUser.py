@@ -1,7 +1,12 @@
 from rest_framework import serializers
-
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from EnvioDeMercancia.Apps.User.models import User
+
+
+class CustomTokenObtainPairSerilizer(TokenObtainPairSerializer):
+    pass
+
 
 class userSerilizer(serializers.ModelSerializer):
 

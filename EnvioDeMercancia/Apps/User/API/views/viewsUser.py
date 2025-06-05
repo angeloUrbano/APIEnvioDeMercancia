@@ -1,27 +1,41 @@
+
+#DRF
 from rest_framework import  viewsets
 from rest_framework import status
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework.generics import GenericAPIView
+from rest_framework_simplejwt.tokens import RefreshToken
+
+#DJANGO
+from django.contrib.auth import authenticate
+from django.contrib.sessions.models import Session
+from django.utils import timezone
 
 
+#PROPIAS
 from EnvioDeMercancia.Apps.User.models import User
-from EnvioDeMercancia.Apps.User.API.serializers.serializersUser import userSerilizer
+from EnvioDeMercancia.Apps.User.API.serializers.serializersUser import userSerilizer , CustomTokenObtainPairSerilizer
 
-from EnvioDeMercancia.Apps.User.API.SOLID.repositories import RepositorioSQL
-from EnvioDeMercancia.Apps.User.API.SOLID.services import GestionUserSerializersService
+from EnvioDeMercancia.Apps.User.API.SOLID.repositories import RepositorioSQLUser , RepositorioSQLogout , DjangoSessionRepository
+from EnvioDeMercancia.Apps.User.API.SOLID.services import GestionUserSerializersService , TokenService , LogoutService
 
 
 #users crud 
 class UsersCrudViewSet(viewsets.ModelViewSet):
+
     serializer_class = userSerilizer
     queryset =  serializer_class.Meta.model.objects.all()
-    #querysRepositorioSQL = RepositorioSQL()
+    #querysRepositorioSQLUser = RepositorioSQLUser()
     #gestionService = GestionUserSerializersService()
     modelo = User
+    #permission_classes = (IsAuthenticated,)
 
 
     def __init__(self, repository=None, service=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.querysRepositorioSQL = repository or RepositorioSQL()
+        self.querysRepositorioSQLUser = repository or RepositorioSQLUser()
         self.gestionService = service or GestionUserSerializersService()
 
     """
@@ -39,7 +53,7 @@ class UsersCrudViewSet(viewsets.ModelViewSet):
     #GET ALL USERS
     def list(self  , request):
         try:
-            query = self.querysRepositorioSQL.GetAllUsersRepositori(self.modelo)
+            query = self.querysRepositorioSQLUser.GetAllUsersRepositori(self.modelo)
             user_serializers = self.gestionService.GetAllUsersService(self.serializer_class , query)
             return Response(user_serializers , status= status.HTTP_200_OK)
         except:
@@ -58,7 +72,7 @@ class UsersCrudViewSet(viewsets.ModelViewSet):
 
     #delete user  
     def destroy(self , request , pk=None):
-        userDeleted =  self.querysRepositorioSQL.DeleteUserRepositori(self.modelo , pk)
+        userDeleted =  self.querysRepositorioSQLUser.DeleteUserRepositori(self.modelo , pk)
         if  userDeleted["success"] ==False :
             return Response({"message":"server error" , "error":userDeleted["error"]}, status=status.HTTP_500_INTERNAL_SERVER_ERROR) 
         elif userDeleted["success"]:
@@ -67,7 +81,7 @@ class UsersCrudViewSet(viewsets.ModelViewSet):
         
     #update user
     def update(self , request , pk=None): 
-        query = self.querysRepositorioSQL.UpdateUserRepositori(self.modelo , pk)
+        query = self.querysRepositorioSQLUser.UpdateUserRepositori(self.modelo , pk)
         if  query["success"] ==False :
             return Response({"message":"server error" , "error":query["error"]}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         user_serializer = self.gestionService.UpdateUserService(self.serializer_class ,  query["result"] , request.data) 
@@ -86,7 +100,7 @@ class UsersCrudViewSet(viewsets.ModelViewSet):
         
     #this function get just one user
     def retrieve (self , request , pk=None):
-        query = self.querysRepositorioSQL.GetOneUserRepositori(self.modelo , pk)
+        query = self.querysRepositorioSQLUser.GetOneUserRepositori(self.modelo , pk)
         # in case user not found etc
         if  query["success"] ==False :
             return Response({"message":"server error" , "error":query["error"]}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -103,9 +117,47 @@ class UsersCrudViewSet(viewsets.ModelViewSet):
 
 
         
+#login class to users system
+class Login(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerilizer()
+
+    def post(self , request , *args , **kwargs):
+        username = request.data.get("username" , "")
+        password = request.data.get("password" , "")
+        user =  authenticate(username=username,password=password)
+        if not user:
+            return Response({"menssage": "user or password incorrect"} , status = status.HTTP_400_BAD_REQUEST)
+
+        tokens = TokenService.generate_token(user)
+        user_serializer = userSerilizer(user)
+        return Response({
+            "Token": tokens["access"],
+            "refresh-token":tokens["refresh"],
+            "user":user_serializer.data,
+            "message":"success"
+            } , status = status.HTTP_200_OK)
 
 
+
+# users Logout class 
+class Logout(GenericAPIView):
+    model = User
+    userLogoutRepositorie = RepositorioSQLogout()
+    logoutService = LogoutService()
+    sessionLogout = DjangoSessionRepository()
+
+    def post(self , request , *args , **kwargs):
+        user = self.userLogoutRepositorie.get_user(self.model , request.data.get("user"))
+        if user is None:
+            return Response({"menssage": "user does not exist"} , status = status.HTTP_400_BAD_REQUEST)
         
+        self.logoutService.invalidateRefreshToken(user)# invalidate refresh token
+        self.sessionLogout.clear_sessions(user) #delete sessions-->
+        return Response({"message": "session close correctly"} , status = status.HTTP_200_OK)
+        
+        
+        
+
 
 
 
