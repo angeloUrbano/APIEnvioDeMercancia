@@ -33,8 +33,8 @@ BASE_APPS =[
 
 #MY APPLICATIONS
 LOCAL_APPS =[
-    'EnvioDeMercancia.Apps.User'
-
+    'EnvioDeMercancia.Apps.User',
+    'EnvioDeMercancia.Apps.Client'
 ]
 
 
@@ -57,6 +57,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'simple_history.middleware.HistoryRequestMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
