@@ -67,7 +67,7 @@ si lo lleva una persona se le toman sus datos pero son los mismos
 class ClienteUsuarioDestino(models.Model):
     nombre = models.CharField(verbose_name='Nombre del cliente',max_length = 150, blank= False, null=False)
     apellido = models.CharField(verbose_name='Apellido del cliente',max_length = 150, blank= True, null=True)
-    identificacion = models.CharField(verbose_name='identificacion',max_length = 150, blank= True, null=True)
+    identificacion = models.CharField(verbose_name='identificacion' , unique=True ,max_length = 150, blank= True, null=True)
     correo = models.EmailField(verbose_name='correo', max_length=254, unique=True , blank= True, null=True)
     correo_aux = models.EmailField( verbose_name='correo aux',  max_length=254, unique=True , blank= True, null=True)
     telefono = models.CharField(max_length = 20 , blank= True, null=True , validators=[
@@ -80,6 +80,7 @@ class ClienteUsuarioDestino(models.Model):
                                 message="Ingrese un número telefónico válido (ej: +1234567890 o 1234567890)")])
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     fecha_modificacion = models.DateTimeField(auto_now=True)
+    is_active = models.BooleanField(default = True)
     historical = HistoricalRecords()
 
 
@@ -93,7 +94,7 @@ class ClienteUsuarioDestino(models.Model):
 class ClienteQuienEnvia(models.Model):
     nombre = models.CharField(verbose_name='Nombre del cliente',max_length = 150, blank= False, null=False)
     apellido = models.CharField(verbose_name='Apellido del cliente',max_length = 150, blank= True, null=True)
-    identificacion = models.CharField(verbose_name='identificacion',max_length = 150, blank= False, null=False)
+    identificacion = models.CharField(verbose_name='identificacion' , unique=True ,max_length = 150, blank= False, null=False)
     correo = models.EmailField(verbose_name='correo',max_length=254, unique=True , blank= False, null=False)
     correo_aux = models.EmailField(verbose_name='correo aux',max_length=254, unique=True , blank= True, null=True)
     telefono = models.CharField(max_length = 20 , blank= True, null=True , validators=[
@@ -106,6 +107,7 @@ class ClienteQuienEnvia(models.Model):
                                 message="Ingrese un número telefónico válido (ej: +1234567890 o 1234567890)")])
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     fecha_modificacion = models.DateTimeField(auto_now=True)
+    is_active = models.BooleanField(default = True)
     historical = HistoricalRecords()
 
     
@@ -118,7 +120,7 @@ class ClienteQuienEnvia(models.Model):
 class ClienteQuienRecibe(models.Model):
     nombre = models.CharField(verbose_name='Nombre del cliente',max_length = 150, blank= False, null=False)
     apellido = models.CharField(verbose_name='Apellido del cliente',max_length = 150, blank= True, null=True)
-    identificacion = models.CharField(verbose_name='identificacion',max_length = 150, blank= True, null=True)
+    identificacion = models.CharField(verbose_name='identificacion', unique=True , max_length = 150, blank= True, null=True)
     correo = models.EmailField(verbose_name='correo',max_length=254, unique=True , blank= True, null=True)
     correo_aux = models.EmailField(verbose_name='correo aux',max_length=254, unique=True , blank= True, null=True)
     telefono = models.CharField(max_length = 20 , blank= True, null=True , validators=[
@@ -131,10 +133,11 @@ class ClienteQuienRecibe(models.Model):
                                 message="Ingrese un número telefónico válido (ej: +1234567890 o 1234567890)")])
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     fecha_modificacion = models.DateTimeField(auto_now=True)
+    is_active = models.BooleanField(default = True)
     historical = HistoricalRecords()
 
     def __str__(self):
-        return f"{self.nombre}, {self.apellido}"
+        return f"{self.nombre}, {self.apellido}" 
     
     
 
@@ -143,7 +146,7 @@ class ClienteQuienRecibe(models.Model):
 class ClientNatural(models.Model):
     nombre = models.CharField(verbose_name='Nombre del cliente',max_length = 150, blank= False, null=False)
     apellido = models.CharField(verbose_name='Apellido del cliente',max_length = 150, blank= True, null=True)
-    identificacion = models.CharField(verbose_name='identificacion',max_length = 150, blank= False, null=False)
+    identificacion = models.CharField(verbose_name='identificacion' , unique=True ,max_length = 150, blank= False, null=False)
     correo = models.EmailField(verbose_name='correo',max_length=254, unique=True , blank= False, null=False)
     correo_aux = models.EmailField(verbose_name='correo aux',max_length=254, unique=True , blank= True, null=True)
     telefono =models.CharField(max_length = 20 , blank= True, null=True , validators=[
@@ -161,7 +164,45 @@ class ClientNatural(models.Model):
     quien_envia = models.OneToOneField(ClienteQuienEnvia , verbose_name='Nombre de quien env la mercancia' , on_delete=models.CASCADE  , blank= False, null=False)
     quien_recibe = models.OneToOneField(ClienteQuienRecibe , verbose_name= 'Nombre de quien rcb la mercancia' , on_delete=models.CASCADE , blank= False, null=False)
     codigo_cliente = models.CharField(verbose_name="codigo de cliente" , max_length=200, blank= False, null=False )
+    is_active = models.BooleanField(default = True)
     historical = HistoricalRecords()
+
+
+    def delete(self, *args, **kwargs):
+        self.is_active = False
+        self.save()
+        if self.quien_envia:
+            self.quien_envia.is_active = False
+            self.quien_envia.save()
+            self.quien_envia.direcciones_quien_envia.update(is_active=False)
+        
+        if self.quien_recibe:
+            self.quien_recibe.is_active = False
+            self.quien_recibe.save()
+            self.quien_recibe.direcciones_quien_recibe.update(is_active=False)
+        
+        self.direcciones_cliente_natural.update(is_active=False)
+        
+        return super().delete(*args, **kwargs) if kwargs.get('hard_delete', False) else None
+    
+
+    # con esta funcion revierto los cambios de la eliminacion logica
+    def activate(self, *args, **kwargs):
+        self.is_active = True
+        self.save()
+        if self.quien_envia:
+            self.quien_envia.is_active = True
+            self.quien_envia.save()
+            self.quien_envia.direcciones_quien_envia.update(is_active=True)
+        
+        if self.quien_recibe:
+            self.quien_recibe.is_active = True
+            self.quien_recibe.save()
+            self.quien_recibe.direcciones_quien_recibe.update(is_active=True)
+        
+        self.direcciones_cliente_natural.update(is_active=True)
+        
+        return super().delete(*args, **kwargs) if kwargs.get('hard_delete', False) else None
 
 
 
@@ -174,7 +215,7 @@ class ClientNatural(models.Model):
 class ClientCourier(models.Model):
     nombre = models.CharField(verbose_name='Nombre del cliente',max_length = 150, blank= False, null=False)
     apellido = models.CharField(verbose_name='Apellido del cliente',max_length = 150, blank= True, null=True)
-    identificacion = models.CharField(verbose_name='identificacion',max_length = 150, blank= True, null=True)
+    identificacion = models.CharField(verbose_name='identificacion', unique=True ,max_length = 150, blank= True, null=True)
     correo = models.EmailField(verbose_name='correo',max_length=254, unique=True , blank= True, null=True)
     correo_aux = models.EmailField(verbose_name='correo aux',max_length=254, unique=True , blank= True, null=True)
     telefono = models.CharField(max_length = 20 , blank= True, null=True , validators=[
@@ -192,10 +233,36 @@ class ClientCourier(models.Model):
     usuario_destino = models.OneToOneField(ClienteUsuarioDestino ,verbose_name='Nombre de quien env la mercancia' , on_delete=models.CASCADE )
 
     codigo_cliente = models.CharField(verbose_name="codigo de cliente" , max_length=200, blank= False, null=False )
+    is_active = models.BooleanField(default = True)
     historical = HistoricalRecords()
 
-
-
+    def delete(self, *args, **kwargs):
+        self.is_active = False
+        self.save()
+    
+        if self.usuario_destino:
+            self.usuario_destino.is_active = False
+            self.usuario_destino.save()
+            self.usuario_destino.direcciones_destino.update(is_active=False)
+        
+        self.direcciones_cliente_courier.update(is_active=False)
+        
+        return super().delete(*args, **kwargs) if kwargs.get('hard_delete', False) else None
+    
+    #funcion para activar lo que se desactivo ern el eliminado logico
+    def activate(self, *args, **kwargs):
+        self.is_active = True
+        self.save()
+    
+        if self.usuario_destino:
+            self.usuario_destino.is_active = True
+            self.usuario_destino.save()
+            self.usuario_destino.direcciones_destino.update(is_active=True)
+        
+        self.direcciones_cliente_courier.update(is_active=True)
+        
+        return super().delete(*args, **kwargs) if kwargs.get('hard_delete', False) else None
+    
 
     def __str__(self):
         return f"{self.nombre}, {self.apellido}"
@@ -211,7 +278,7 @@ class Direccion(models.Model):
     cliente_natural = models.ForeignKey(
         ClientNatural,
         on_delete=models.CASCADE,
-        related_name="direcciones",
+        related_name="direcciones_cliente_natural",
         null=True,
         blank=True
     )
@@ -219,10 +286,38 @@ class Direccion(models.Model):
     cliente_courier = models.ForeignKey(
         ClientCourier,
         on_delete=models.CASCADE,
-        related_name="direcciones",
+        related_name="direcciones_cliente_courier",
         null=True,
         blank=True
     )
+
+    #--------------------------->
+
+    cliente_quien_envia = models.ForeignKey(
+        ClienteQuienEnvia,
+        on_delete=models.CASCADE,
+        related_name="direcciones_quien_envia",
+        null=True,
+        blank=True
+    )
+
+    cliente_quien_recibe = models.ForeignKey(
+        ClienteQuienRecibe,
+        on_delete=models.CASCADE,
+        related_name="direcciones_quien_recibe",
+        null=True,
+        blank=True
+    )
+
+    cliente_destino = models.ForeignKey(
+        ClienteUsuarioDestino,
+        on_delete=models.CASCADE,
+        related_name="direcciones_destino",
+        null=True,
+        blank=True
+    )
+
+    is_active = models.BooleanField(default = True)
     historical = HistoricalRecords()
 
     def clean(self):
@@ -230,7 +325,21 @@ class Direccion(models.Model):
             raise ValidationError("Debe relacionarse con al menos un tipo de cliente")
         if self.cliente_natural and self.cliente_courier:
             raise ValidationError("Solo puede relacionarse con un tipo de cliente")
+        
+
+        # si el cliente es natural deben haber direcciones para quien envia y para quien recibe
+        if self.cliente_natural:
+            if not (self.cliente_quien_envia or self.cliente_quien_recibe):
+                raise ValidationError("los clientes quien recibe y quien envia deben tener direcciones")
+        
+
+        #si el cliente es courrier deben haber direccioens para el cliente destino tambien
+        if self.cliente_courier:
+            if not self.cliente_destino:
+                raise ValidationError("Cliente destino debe tener direccion.")
+        
 
 
     def __str__(self):
         return f"{self.casa}, {self.sector}, {self.municipio}, {self.estado}"
+    
