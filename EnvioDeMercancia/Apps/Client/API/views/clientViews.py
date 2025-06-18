@@ -8,6 +8,7 @@ from rest_framework.generics import (GenericAPIView , ListAPIView , RetrieveAPIV
 from rest_framework.views import APIView
 
 from rest_framework.exceptions import NotFound
+from django.core.exceptions import ValidationError
 
 
 
@@ -199,7 +200,6 @@ class GeneraListClients(APIView):
         """
         
         tipo_cliente = request.headers.get('Tipo-Cliente', "").lower()
-        
         if tipo_cliente not in ['natural', 'courier']:
             return Response(
                 {'error': 'Tipo de cliente no válido'},
@@ -293,89 +293,70 @@ class GetNaturalOrCourierClient(RetrieveUpdateDestroyAPIView):
             )
 
         
-class ClientCourierDestinoView(RetrieveUpdateAPIView):
-
-    
-    def __init__(self):
-        self.service = ClienteRelacionadosService()
 
 
-    serializer_class = ClientCourierDestinoSerializer
-    queryset = ClientCourier.objects.all()
 
 
+class ClienteRelacionadoView(RetrieveUpdateAPIView):
+
+    # importante Desplegar
     """
-        esta clase envia solo el id del cliente courier y el serializer y la funcion
-        get_object hace el resto para traerme el cliente destino y sus direcciones respectivas 
+    esta res la informacion que se tiene que enviar en la solicitud para que se pueda 
+    seleccionar el mes correcto. cada uno de os casos se les tiene que pasar una informacion
+    especifica.
+
+
+    ClientCourier destino:
+    GET /clientes/relacionado/1/
+    Header: Tipo-Relacion: destino
+
+    ClientNatural quien_envia:
+    GET /clientes/relacionado/1/
+    Header: Tipo-Relacion: quien_envia
+
+    ClientNatural quien_recibe:
+    GET /clientes/relacionado/1/
+    Header: Tipo-Relacion: quien_recibe
+    
     """
     
-    def get_object(self):
-        try:
-            return self.queryset.select_related(
-                'usuario_destino'
-            ).prefetch_related(
-                'usuario_destino__direcciones_destino'
-            ).get(id=self.kwargs['pk'])
-        except ClientCourier.DoesNotExist:
-            raise NotFound("ClientCourier no encontrado")
-        
-    def update(self, request, *args, **kwargs): 
-        serializer = self.service.update_client_Relacionado(obj=self.get_object() ,  request=request.data ,  serializer_a_usar=ClientCourierDestinoUpdateSerializer)
-        if serializer["Success"]==False:  
-            return Response(serializer["data"], status=status.HTTP_400_BAD_REQUEST)
-  
-        return Response(serializer["data"] , status=status.HTTP_200_OK)
-       
-
-class ClientNaturalQuienEnviaView(RetrieveUpdateAPIView):
-    def __init__(self):
-        self.service = ClienteRelacionadosService()
-
-    serializer_class = ClientNaturalQuienEnviaSerializer
-    queryset = ClientNatural.objects.all()
-
-    def get_object(self):
-        try:
-            return self.queryset.select_related(
-                "quien_envia"
-                ).prefetch_related(
-                    "quien_envia__direcciones_quien_envia"
-                ).get(id=self.kwargs["pk"])
-
-        except ClientNatural.DoesNotExist:
-            raise NotFound("ClientNatural quien envia no encontrado") 
-        
-    def update(self , request , *args , **kwargs):
-        serializer = self.service.update_client_Relacionado(obj=self.get_object() ,  request=request.data ,  serializer_a_usar=ClientNaturalQuienEnviaUpdateSerializer)
-        if serializer["Success"]==False:  
-            return Response(serializer["data"], status=status.HTTP_400_BAD_REQUEST)
-  
-        return Response(serializer["data"] , status=status.HTTP_200_OK)
-        
-
-
-class ClientNaturalQuienRecibeView(RetrieveUpdateAPIView):
-    def __init__(self):
-        self.service = ClienteRelacionadosService()
-    serializer_class = ClientNaturalQuienRecibeSerializer
-    queryset = ClientNatural.objects.all()
-
-    def get_object(self):
-        try:
-            return self.queryset.select_related(
-                "quien_recibe"
-            ).prefetch_related(
-                "quien_recibe__direcciones_quien_recibe"
-            ).get(id=self.kwargs["pk"])
-        
-        except ClientNatural.DoesNotExist as e :
-            raise NotFound("cliente natural quien recibe no encontrado")
-        
-    def update(self , request , *args , **kwargs):
-
-        serializer = self.service.update_client_Relacionado(obj=self.get_object() ,  request=request.data ,  serializer_a_usar=ClientNaturalQuienRecibeUpdateSerializer)
-        if serializer["Success"]==False:  
-            return Response(serializer["data"], status=status.HTTP_400_BAD_REQUEST)
-  
-        return Response(serializer["data"] , status=status.HTTP_200_OK)
     
+    def __init__(self):
+        self.service = ClienteRelacionadosService()
+
+    def get_object(self):
+        tipo_relacion = self.request.headers.get('Tipo-Relacion', '').lower()
+        try:
+            return self.service.get_cliente_relacionado(
+                pk=self.kwargs['pk'],
+                tipo_relacion=tipo_relacion
+            )
+        except ValueError as e:
+            raise ValidationError({'error': str(e)})
+        except NotFound as e:
+            raise NotFound(str(e))
+
+    def get_serializer_class(self):
+        tipo_relacion = self.request.headers.get('Tipo-Relacion', '').lower()
+        config = self.service.RELACIONES_CONFIG.get(tipo_relacion, {})
+        return config.get('serializer', ClientCourierDestinoSerializer)
+
+    def update(self, request, *args, **kwargs):
+        tipo_relacion = request.headers.get('Tipo-Relacion', '').lower()
+        try:
+            result = self.service.update_cliente_relacionado(
+                obj=self.get_object(),
+                request_data=request.data,
+                tipo_relacion=tipo_relacion
+            )
+            
+            if not result["Success"]:
+                return Response(result["data"], status=status.HTTP_400_BAD_REQUEST)
+            
+            return Response(result["data"], status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )

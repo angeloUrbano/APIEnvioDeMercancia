@@ -1,6 +1,6 @@
 from django.urls import path
 
-from EnvioDeMercancia.Apps.Client.API.views.clientViews import (GeneraListClients , GetNaturalOrCourierClient , ClientCourierDestinoView   , ClientNaturalQuienEnviaView  , ClientNaturalQuienRecibeView )
+from EnvioDeMercancia.Apps.Client.API.views.clientViews import (GeneraListClients , GetNaturalOrCourierClient  , ClienteRelacionadoView)
 
 
 urlpatterns = [
@@ -11,12 +11,7 @@ urlpatterns = [
     path("NaturalOrCourierRetrive/<int:pk>/" , GetNaturalOrCourierClient.as_view() , name ="NaturalOrCourierRetriveName"),
     
 
-    #lista y edita clientes relacionados a clientes bases
-    path('clientes-courier/<int:pk>/destino/', ClientCourierDestinoView.as_view(), name='cliente-courier-destino'),
-    path('clientes-natural/<int:pk>/quienEnvia/', ClientNaturalQuienEnviaView.as_view(), name='cliente-natural-quienEnvia'),
-    path('clientes-natural/<int:pk>/quienRecibe/', ClientNaturalQuienRecibeView.as_view(), name='cliente-natural-quienRecibe'),
-
-
-    
+    #lista y edita clientes relacionados con clientes bases
+    path('clientes-relacionado/<int:pk>/', ClienteRelacionadoView.as_view(), name='cliente-relacionado'),
     
 ]

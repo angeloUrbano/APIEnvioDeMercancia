@@ -1,6 +1,3 @@
-from rest_framework.exceptions import NotFound
-
-
 from EnvioDeMercancia.Apps.Client.models import (
     ClienteUsuarioDestino, 
     ClienteQuienEnvia,
@@ -9,7 +6,6 @@ from EnvioDeMercancia.Apps.Client.models import (
     ClientCourier,
     Direccion
 )
-
 
 
 
@@ -31,7 +27,6 @@ class ClienteRepository :
     def create_courier(data):
         return ClientCourier.objects.create(**data)
     
-
     @staticmethod
     def get_natural(data):
         return ClientNatural.objects.filter(id=data).first()
@@ -43,49 +38,3 @@ class ClienteRepository :
 
 
 
-class clientesRelacionadosRepository:
-
-    @staticmethod
-    def get_cliente_destino(pk):
-        clients =  ClientCourier.objects.all()
-
-        try:
-            return clients.select_related(
-            'usuario_destino'
-            ).prefetch_related(
-            'usuario_destino__direcciones_destino'
-        ).get(id=pk)
-        except ClientCourier.DoesNotExist:
-            raise NotFound("ClientCourier no encontrado")
-        
-
-
-    @staticmethod
-    def get_cliente_destino(pk):
-        clients =  ClientCourier.objects.all()
-
-        try:
-            return clients.select_related(
-            'usuario_destino'
-            ).prefetch_related(
-            'usuario_destino__direcciones_destino'
-        ).get(id=pk)
-        except ClientCourier.DoesNotExist:
-            raise NotFound("ClientCourier no encontrado")
-        
-
-
-
-    
-    @staticmethod
-    def get_cliente_destino(pk):
-        clients =  ClientCourier.objects.all()
-
-        try:
-            return clients.select_related(
-            'usuario_destino'
-            ).prefetch_related(
-            'usuario_destino__direcciones_destino'
-        ).get(id=pk)
-        except ClientCourier.DoesNotExist:
-            raise NotFound("ClientCourier no encontrado")

@@ -59,7 +59,7 @@ class ClientNaturalQuienEnviaUpdateSerializer(serializers.ModelSerializer):
         model =ClientNatural
         fields =["nombre" , "apellido" , "quien_envia"]
 
-
+    @transaction.atomic
     def update(self , instance , validated_data):
         quien_envia_data = validated_data.pop("quien_envia" ,{})
         direcciones_data = quien_envia_data.pop("direcciones_quien_envia" , None)

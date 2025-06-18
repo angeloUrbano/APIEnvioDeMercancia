@@ -54,7 +54,7 @@ class ClientCourierDestinoUpdateSerializer(serializers.ModelSerializer):
         model=ClientCourier
         fields=["nombre" , "apellido" , "usuario_destino"]  
 
-
+    @transaction.atomic
     def update(self , instance , validated_data):
         usuario_destino_data = validated_data.pop('usuario_destino', {})
         direcciones_data = usuario_destino_data.pop('direcciones_destino', None)

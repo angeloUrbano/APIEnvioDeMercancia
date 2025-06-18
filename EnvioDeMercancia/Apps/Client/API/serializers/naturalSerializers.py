@@ -170,7 +170,7 @@ class ClientNaturalUpdateSerializer(serializers.ModelSerializer):
             'correo': {'validators': []},
             'correo_aux': {'validators': []}
         }
-
+    @transaction.atomic
     def update(self, instance, validated_data):
         direcciones_data = validated_data.pop("direcciones_cliente_natural", None)
         

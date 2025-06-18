@@ -326,7 +326,6 @@ class Direccion(models.Model):
         if self.cliente_natural and self.cliente_courier:
             raise ValidationError("Solo puede relacionarse con un tipo de cliente")
         
-
         # si el cliente es natural deben haber direcciones para quien envia y para quien recibe
         if self.cliente_natural:
             if not (self.cliente_quien_envia or self.cliente_quien_recibe):

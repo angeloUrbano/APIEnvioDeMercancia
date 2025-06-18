@@ -160,7 +160,7 @@ class ClientCourierUpdateSerializer(serializers.ModelSerializer):
                     'is_active',
                     'direcciones_cliente_courier'  # Solo direcciones del courier , solo eso aparte del modelo original tiene permitido recibir
                 ]
-        
+    @transaction.atomic
     def update(self , instance , validate_data):
         direcciones_data = validate_data.pop("direcciones_cliente_courier" , None)
         cliente = super().update(instance , validate_data)

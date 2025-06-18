@@ -62,7 +62,7 @@ class ClientNaturalQuienRecibeUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model= ClientNatural
         fields=["nombre" , "apellido" ,  "quien_recibe"]
-
+    @transaction.atomic
     def update(self , instance ,validated_data ): 
         quien_recibe_data = validated_data.pop("quien_recibe" , {})
         direcciones_data   =  quien_recibe_data.pop("direcciones_quien_recibe" , None)
