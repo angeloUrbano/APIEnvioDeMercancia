@@ -5,6 +5,9 @@ from django.core.exceptions import ValidationError
 
 from simple_history.models import HistoricalRecords
 
+
+
+
 # Create your models here.
 
 

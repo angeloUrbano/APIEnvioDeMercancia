@@ -14,31 +14,18 @@ from django.core.exceptions import ValidationError
 
 #Propias
 from EnvioDeMercancia.Apps.Client.models import (
-    ClienteUsuarioDestino, 
-    ClienteQuienEnvia,
-    ClienteQuienRecibe, 
     ClientNatural,
     ClientCourier,
-    Direccion
 )
 
 #serializers client courier , list create and update
-from EnvioDeMercancia.Apps.Client.API.serializers.courierSerializer import GeneralListClientCourierSerializers , ClientCourierCreateSerializer , ClientCourierUpdateSerializer
+from EnvioDeMercancia.Apps.Client.API.serializers.courierSerializer import GeneralListClientCourierSerializers 
 
 #serializers client natural , list create and update
-from EnvioDeMercancia.Apps.Client.API.serializers.naturalSerializers import  GeneralListClienNaturaltSerializers , ClientNaturalCreateSerializer , ClientNaturalUpdateSerializer
+from EnvioDeMercancia.Apps.Client.API.serializers.naturalSerializers import  GeneralListClienNaturaltSerializers
 
 # serializers cliente destino
-from EnvioDeMercancia.Apps.Client.API.serializers.clienteDestinoSerializers import ClientCourierDestinoSerializer , ClientCourierDestinoUpdateSerializer
-
-#serializers cliente quien envia
-from EnvioDeMercancia.Apps.Client.API.serializers.clienteQuienEnviaSerializers  import ClientNaturalQuienEnviaSerializer, ClientNaturalQuienEnviaUpdateSerializer
-
-#serializers cliente quien recibe
-from EnvioDeMercancia.Apps.Client.API.serializers.clienteQuienRecibeSerializers import (
-ClientNaturalQuienRecibeSerializer , ClientNaturalQuienRecibeUpdateSerializer
-)
-
+from EnvioDeMercancia.Apps.Client.API.serializers.clienteDestinoSerializers import ClientCourierDestinoSerializer 
 
 
 from EnvioDeMercancia.Apps.Client.API.SOLID.service import ClienteService , ClienteRelacionadosService
@@ -70,7 +57,7 @@ class GeneraListClients(APIView):
     def post(self, request, *args, **kwargs):
         #the client should send the attribute to select which model will use de backend
         #the key should be ModelSelected
-
+ 
 
         #IMPORTANT
         """
@@ -301,8 +288,8 @@ class ClienteRelacionadoView(RetrieveUpdateAPIView):
 
     # importante Desplegar
     """
-    esta res la informacion que se tiene que enviar en la solicitud para que se pueda 
-    seleccionar el mes correcto. cada uno de os casos se les tiene que pasar una informacion
+    esta es la informacion que se tiene que enviar en la solicitud para que se pueda 
+    seleccionar el mes correcto. cada uno de los casos se les tiene que pasar una informacion
     especifica.
 
 
@@ -342,6 +329,7 @@ class ClienteRelacionadoView(RetrieveUpdateAPIView):
         return config.get('serializer', ClientCourierDestinoSerializer)
 
     def update(self, request, *args, **kwargs):
+        
         tipo_relacion = request.headers.get('Tipo-Relacion', '').lower()
         try:
             result = self.service.update_cliente_relacionado(
@@ -360,3 +348,6 @@ class ClienteRelacionadoView(RetrieveUpdateAPIView):
                 {'error': str(e)},
                 status=status.HTTP_400_BAD_REQUEST
             )
+        
+
+

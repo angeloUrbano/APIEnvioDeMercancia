@@ -9,9 +9,6 @@ from django.db import transaction
 
 from EnvioDeMercancia.Apps.Client.models import (
     ClienteUsuarioDestino, 
-    ClienteQuienEnvia,
-    ClienteQuienRecibe, 
-    ClientNatural,
     ClientCourier,
     Direccion
 )

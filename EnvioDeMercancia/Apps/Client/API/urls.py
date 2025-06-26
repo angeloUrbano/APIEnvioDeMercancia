@@ -8,9 +8,8 @@ urlpatterns = [
     path("AllClients/" , GeneraListClients.as_view() , name ="AllClientsName"),
     
     #edita , elimina y lista uno solo . para los clientes bases
-    path("NaturalOrCourierRetrive/<int:pk>/" , GetNaturalOrCourierClient.as_view() , name ="NaturalOrCourierRetriveName"),
+    path("NaturalOrCourierRetrieve/<int:pk>/" , GetNaturalOrCourierClient.as_view() , name ="NaturalOrCourierRetriveName"),
     
-
     #lista y edita clientes relacionados con clientes bases
     path('clientes-relacionado/<int:pk>/', ClienteRelacionadoView.as_view(), name='cliente-relacionado'),
     

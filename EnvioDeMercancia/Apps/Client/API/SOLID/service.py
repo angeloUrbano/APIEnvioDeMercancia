@@ -1,10 +1,6 @@
 from EnvioDeMercancia.Apps.Client.models import (
-    ClienteUsuarioDestino, 
-    ClienteQuienEnvia,
-    ClienteQuienRecibe, 
     ClientNatural,
-    ClientCourier,
-    Direccion
+    ClientCourier
 )
 
 from rest_framework.exceptions import NotFound
@@ -57,12 +53,14 @@ class ClienteService:
         raise ValueError(serializer.errors)
     
     def update_cliente(self, id, tipo_cliente , request):
+
+
         if tipo_cliente == "natural":
             client = self.repository.get_natural(id)
-            serializer = ClientNaturalUpdateSerializer(instance=client , data= request.data)
+            serializer = ClientNaturalUpdateSerializer(instance=client , data= request.data , context={"request":request})
         else:
             client = self.repository.get_courier(id)
-            serializer = ClientCourierUpdateSerializer(instance=client , data= request.data)
+            serializer = ClientCourierUpdateSerializer(instance=client , data= request.data , context={"request":request})
 
         if serializer.is_valid():
             serializer.save()

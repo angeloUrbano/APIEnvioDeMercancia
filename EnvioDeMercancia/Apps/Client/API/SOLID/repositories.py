@@ -1,10 +1,6 @@
 from EnvioDeMercancia.Apps.Client.models import (
-    ClienteUsuarioDestino, 
-    ClienteQuienEnvia,
-    ClienteQuienRecibe, 
     ClientNatural,
-    ClientCourier,
-    Direccion
+    ClientCourier
 )
 
 

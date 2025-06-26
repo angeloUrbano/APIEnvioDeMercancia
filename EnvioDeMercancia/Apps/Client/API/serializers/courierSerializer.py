@@ -8,9 +8,6 @@ from django.db import transaction
 
 from EnvioDeMercancia.Apps.Client.models import (
     ClienteUsuarioDestino, 
-    ClienteQuienEnvia,
-    ClienteQuienRecibe, 
-    ClientNatural,
     ClientCourier,
     Direccion
 )
@@ -102,9 +99,8 @@ class ClientCourierCreateSerializer(serializers.ModelSerializer):
         direcciones_destino_data = self.context['request'].data.get('direcciones_destino', [])
 
         try:
-
             usuario_destino = ClienteUsuarioDestino.objects.create(**usuario_destino_data)
-       
+    
             cliente_courier = ClientCourier.objects.create(
                 usuario_destino=usuario_destino,
                 **validated_data
@@ -119,7 +115,6 @@ class ClientCourierCreateSerializer(serializers.ModelSerializer):
                     **direccion_data
                 )
 
-
             # direcciones destino
             if not direcciones_destino_data:
                 raise ValidationError("Debe proporcionar al menos una dirección para el cliente destino.")
@@ -131,6 +126,7 @@ class ClientCourierCreateSerializer(serializers.ModelSerializer):
                 )
 
             return cliente_courier
+        
 
         except IntegrityError as e:
             raise serializers.ValidationError({
