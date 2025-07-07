@@ -39,7 +39,7 @@ class RecepcionRepository(RecepcionLecturaRepository):
         
     def get_one_box(self , pk):
         try:
-            query = CajasAlmacenadas.objects.filter(id=pk).first()
+            query = CajasAlmacenadas.objects.get(id=pk)
             return {"success":True , "info":query}
         except Exception  as e:
             return {"success":False , "info":str(e)}

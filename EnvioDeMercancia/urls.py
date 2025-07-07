@@ -46,8 +46,18 @@ urlpatterns = [
     #RecepcionEnPuerta
     path('Reception/' , include("EnvioDeMercancia.Apps.RecepcionEnPuerta.API.routers")),
 
+    #WareHouse
+    path("WareHouse/" , include("EnvioDeMercancia.Apps.RecepcionEnPuerta.API.urls")),
+
     #token jwt path
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+
+
+
+
+    #Auditoria Receotion box
+
+    path("AuditoriaReception/" , include("EnvioDeMercancia.Apps.RecepcionEnPuerta.API.urls"))
 
 ]

@@ -21,7 +21,7 @@ from EnvioDeMercancia.Apps.RecepcionEnPuerta.API.serializers.RecepcionSerializer
 from EnvioDeMercancia.Apps.RecepcionEnPuerta.API.SOLID.service import RecepcionService
 
 class RecepcionEnPuertaCRUD(viewsets.ModelViewSet):
-
+    
     def __init__(self, **kwargs):
         self.service = RecepcionService()
         super().__init__(**kwargs)
@@ -35,7 +35,6 @@ class RecepcionEnPuertaCRUD(viewsets.ModelViewSet):
         serializer = self.service.serializer_all_boxes(self.serializer_class)
         if serializer["success"]:
             return Response(serializer["info"] , status=status.HTTP_200_OK)
-
         return Response( {"error":"error obteniendo listado de cajas"}, status=status.HTTP_400_BAD_REQUEST)   
 
     # create 
@@ -44,9 +43,7 @@ class RecepcionEnPuertaCRUD(viewsets.ModelViewSet):
 
         if serializer["success"]:
             return Response(serializer["info"], status=status.HTTP_200_OK)
-        
-        return Response(serializer["info"] , status=status.HTTP_400_BAD_REQEUST)   
-
+        return Response(serializer["info"] , status=status.HTTP_400_BAD_REQUEST)   
 
     #delete  
     def destroy(self , request , pk=None):
@@ -54,17 +51,14 @@ class RecepcionEnPuertaCRUD(viewsets.ModelViewSet):
 
         if box["success"]:
             return Response( box["info"], status=status.HTTP_200_OK)
-        return Response(box["info"] , status=status.HTTP_400_BAD_REQEUST)
-
-
+        return Response(box["info"] , status=status.HTTP_400_BAD_REQUEST)
 
     #update 
     def update(self , request , pk=None): 
         serializer = self.service.serializer_update_box(pk = self.kwargs["pk"] , serializer_class=self.serializer_class , request = request.data)
         if serializer["success"]:
             return Response(serializer["info"] , status=status.HTTP_200_OK)
-        
-        return Response(serializer["info"] , status=status.HTTP_400_BAD_REQEUST)   
+        return Response(serializer["info"] , status=status.HTTP_400_BAD_REQUEST)   
 
 
     #this function get just one box
@@ -73,5 +67,4 @@ class RecepcionEnPuertaCRUD(viewsets.ModelViewSet):
         serializer = self.service.serializer_one_boxes(pk = self.kwargs["pk"] , serializer_class=self.serializer_class)
         if serializer["success"]:
             return Response(serializer["info"] , status=status.HTTP_200_OK)
-
-        return Response({"error":"error obteniendo box"} , status=status.HTTP_400_BAD_REQEUST)  
+        return Response({"error":"error obteniendo box"} , status=status.HTTP_400_BAD_REQUEST)  

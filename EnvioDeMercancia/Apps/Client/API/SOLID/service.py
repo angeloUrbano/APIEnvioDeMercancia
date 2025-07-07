@@ -1,6 +1,10 @@
 from EnvioDeMercancia.Apps.Client.models import (
     ClientNatural,
-    ClientCourier
+    ClientCourier,
+    ClienteUsuarioDestino,
+    ClienteQuienEnvia,
+    ClienteQuienRecibe,
+    Direccion
 )
 
 from rest_framework.exceptions import NotFound
@@ -28,6 +32,18 @@ from EnvioDeMercancia.Apps.Client.API.serializers.naturalSerializers import  Gen
 
 
 from EnvioDeMercancia.Apps.Client.API.SOLID.repositories import ClienteRepository 
+
+
+from EnvioDeMercancia.Apps.Client.API.serializers.AuditoriaSerializer.AuditoriaClientSerializer import (
+ClientDestinoHistoricalSerializer,
+ClienteQuienEnviaHistoricalSerializer,
+ClienteQuienRecibeHistoricalSerializer,
+ClientNaturalHistoricalSerializer,
+ClientCourierHistoricalSerializer,
+DireccionHistoricalSerializer)
+
+
+
 
 
 class ClienteService:
@@ -88,7 +104,54 @@ class ClienteService:
     
 
 
+
+
+class AudicotiriaClientsService:
+    
+    TYPE_MODEL_CONFIG={
+
+        "courier":{
+            "model":ClientCourier,
+            "serializer":ClientCourierHistoricalSerializer,
+        },
+        "natural":{
+            "model":ClientNatural,
+            "serializer":ClientNaturalHistoricalSerializer,
+        },
+        "destino":{
+            "model":ClienteUsuarioDestino,
+            "serializer":ClientDestinoHistoricalSerializer,
+        },
+
+        "quien_envia":{
+            "model":ClienteQuienEnvia,
+            "serializer":ClienteQuienEnviaHistoricalSerializer,
+        },
+
+        "quien_recibe":{
+            "model":ClienteQuienRecibe,
+            "serializer":ClienteQuienRecibeHistoricalSerializer,
+        },
+          "direccion":{
+            "model": Direccion,
+            "serializer":DireccionHistoricalSerializer,
+        }
+
+    }
+
+    @classmethod
+    def get_listado_cliente(cls , model_selected):
+
+        config = cls.TYPE_MODEL_CONFIG.get(model_selected)
+        if not config:
+            raise ValueError('Model seleccionado no valido')
         
+        query = config["model"].historical.model.objects.all()
+
+        serializer  = config["serializer"](query , many=True).data
+
+        return serializer
+
 
 
 class ClienteRelacionadosService:

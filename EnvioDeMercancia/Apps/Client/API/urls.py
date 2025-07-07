@@ -2,6 +2,9 @@ from django.urls import path
 
 from EnvioDeMercancia.Apps.Client.API.views.clientViews import (GeneraListClients , GetNaturalOrCourierClient  , ClienteRelacionadoView)
 
+from EnvioDeMercancia.Apps.Client.API.views.AuditoriaClientViews import (AuditClietsView)
+
+
 
 urlpatterns = [
     #lista todos y crea
@@ -11,6 +14,26 @@ urlpatterns = [
     path("NaturalOrCourierRetrieve/<int:pk>/" , GetNaturalOrCourierClient.as_view() , name ="NaturalOrCourierRetriveName"),
     
     #lista y edita clientes relacionados con clientes bases
-    path('clientes-relacionado/<int:pk>/', ClienteRelacionadoView.as_view(), name='cliente-relacionado'),
+    path('clientes-relacionado/<int:pk>/', ClienteRelacionadoView.as_view(), name='cliente-relacionadoName'),
+
+
+
+    # auditoria de clientes
+    path("AuditClients/" , AuditClietsView , name="auditClientsName"),
+
+
+
+    
+
+
+
+
+    
+
+
+    
+
+
+
     
 ]
