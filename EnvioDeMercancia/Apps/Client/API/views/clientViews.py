@@ -2,33 +2,162 @@
 from rest_framework import  viewsets
 from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.generics import (GenericAPIView , ListAPIView , RetrieveAPIView , 
-                                     RetrieveUpdateDestroyAPIView , ListCreateAPIView ,
-                                     RetrieveAPIView , RetrieveUpdateAPIView)
+from rest_framework.generics import (RetrieveUpdateDestroyAPIView , RetrieveUpdateAPIView)
 from rest_framework.views import APIView
-
 from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import APIException
+
 from django.core.exceptions import ValidationError
 
 
 
 #Propias
-from EnvioDeMercancia.Apps.Client.models import (
-    ClientNatural,
-    ClientCourier,
-)
+# from EnvioDeMercancia.Apps.Client.models import (
+#     ClientNatural,
+#     ClientCourier,
+# )
 
 #serializers client courier , list create and update
-from EnvioDeMercancia.Apps.Client.API.serializers.courierSerializer import GeneralListClientCourierSerializers 
+#from EnvioDeMercancia.Apps.Client.API.serializers.courierSerializer import GeneralListClientCourierSerializers 
 
 #serializers client natural , list create and update
-from EnvioDeMercancia.Apps.Client.API.serializers.naturalSerializers import  GeneralListClienNaturaltSerializers
+#from EnvioDeMercancia.Apps.Client.API.serializers.naturalSerializers import (ClientNaturalUpdateSerializer2,GeneralListClienNaturaltSerializers2  , ClientNaturalCreateSerializer2,  GeneralListClienNaturaltSerializers , ClientNaturalCreateSerializer)
 
 # serializers cliente destino
-from EnvioDeMercancia.Apps.Client.API.serializers.clienteDestinoSerializers import ClientCourierDestinoSerializer 
+#from EnvioDeMercancia.Apps.Client.API.serializers.clienteDestinoSerializers import ClientCourierDestinoSerializer 
 
 
-from EnvioDeMercancia.Apps.Client.API.SOLID.service import ClienteService , ClienteRelacionadosService
+#from EnvioDeMercancia.Apps.Client.API.SOLID.service import ClienteService , ClienteRelacionadosService , ClienteService2
+
+
+from EnvioDeMercancia.Apps.Client.API.SOLID.service import  ClienteService2
+
+
+
+class CustomAPIException(APIException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    default_detail = 'Ocurrió un error en el servidor'
+    default_code = 'error'
+
+    def __init__(self, detail=None, code=None, status_code=None):
+        if status_code is not None:
+            self.status_code = status_code
+        super().__init__(detail=detail, code=code)
+
+
+
+
+
+class GeneraListClients2(APIView):
+
+
+    def __init__(self):
+        self.service = ClienteService2()
+
+    def get (self , request):
+
+        try:
+            data = self.service.list_all_clients()
+            return Response(data, status=status.HTTP_200_OK)
+        except CustomAPIException as e:
+            return Response({'error': str(e.detail)}, status=e.status_code)
+        except Exception as e:
+            return Response(
+                {'error': 'Error interno del servidor al listar clientes'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+
+
+    def post(self, request, *args, **kwargs):
+
+        # DESPLEGAR IMPORTANTE
+        """
+        el formato que se debe utilizar para guarda la informacion de cliente narual es el siguiente.
+        'agente_id' es obcional en el caso de que el cliente pertenezca a un agente.
+
+        {
+            "nombre": "María García",
+            "apellido": "López",
+            "identificacion": "V-12345678",
+            "correo": "maria@example.com",
+            "codigo_cliente": "CLI-NAT-2023-001",
+            "agente_id": 5, # ejemplo de id 
+            "direcciones_cliente_natural": [
+                {
+                    "estado": "Miranda",
+                    "municipio": "Baruta",
+                    "sector": "Urbanización Las Mercedes",
+                    "casa": "Calle 1, Edificio A, Piso 3",
+                    "pais": "venezuela",
+                    "codigo_postal": "0134"
+                }
+            ]
+        }
+
+        """
+
+        try:
+            data = self.service.create_client(data=request.data)
+            return Response(data, status=status.HTTP_201_CREATED)
+        except CustomAPIException as e:
+            return Response({'error': str(e.detail)}, status=e.status_code)
+        except Exception as e:
+            return Response(
+                {'error': 'Error interno del servidor al crear cliente'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+        
+
+        
+
+
+
+
+
+        
+class GeneraListClientSEditarEliminarGet2(APIView):
+
+    def __init__(self):
+        self.service = ClienteService2()
+        
+
+    def put(self, request, *args, **kwargs):
+
+        try:
+            data  = self.service.update_cliente(id=kwargs["pk"] , update_data = request.data )
+            return Response(data , status= status.HTTP_200_OK)
+        except CustomAPIException as e:
+            return Response({'error': str(e.detail)}, status=e.status_code)
+        except Exception as e:
+            return Response(
+                {'error': 'Error interno del servidor al editar cliente'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+
+    def get(self, request, *args, **kwargs):
+        try:
+            data = self.service.list_client(id=kwargs['pk'])
+            return Response(data , status=status.HTTP_200_OK)
+        except CustomAPIException as e:
+            return Response({'error': str(e.detail)}, status=e.status_code)
+        except Exception as e:
+            return Response(
+                {'error': 'Error interno del servidor '},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+        
+
+
+
+
+        
+
+
+
+    
+"""   
 
 
 
@@ -52,6 +181,16 @@ class GeneraListClients(APIView):
         }
         
         return Response(serialized_data  , status=status.HTTP_200_OK)
+    
+
+    def post(self, request, *args, **kwargs):
+
+        serializer = ClientNaturalCreateSerializer(data = request.data)
+        
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data , status = status.HTTP_200_OK)
+        
 
     
     def post(self, request, *args, **kwargs):
@@ -60,7 +199,7 @@ class GeneraListClients(APIView):
  
 
         #IMPORTANT
-        """
+        
             example of information if the user is  a courriertype:
 
             {
@@ -184,7 +323,7 @@ class GeneraListClients(APIView):
 
                      
         
-        """
+        
         
         tipo_cliente = request.headers.get('Tipo-Cliente', "").lower()
         if tipo_cliente not in ['natural', 'courier']:
@@ -287,7 +426,7 @@ class GetNaturalOrCourierClient(RetrieveUpdateDestroyAPIView):
 class ClienteRelacionadoView(RetrieveUpdateAPIView):
 
     # importante Desplegar
-    """
+    
     esta es la informacion que se tiene que enviar en la solicitud para que se pueda 
     seleccionar el mes correcto. cada uno de los casos se les tiene que pasar una informacion
     especifica.
@@ -305,7 +444,7 @@ class ClienteRelacionadoView(RetrieveUpdateAPIView):
     GET /clientes/relacionado/1/
     Header: Tipo-Relacion: quien_recibe
     
-    """
+    
     
     
     def __init__(self):
@@ -351,3 +490,4 @@ class ClienteRelacionadoView(RetrieveUpdateAPIView):
         
 
 
+"""

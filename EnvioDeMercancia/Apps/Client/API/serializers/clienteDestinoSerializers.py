@@ -7,6 +7,10 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 
 
+
+
+"""
+
 from EnvioDeMercancia.Apps.Client.models import (
     ClienteUsuarioDestino, 
     ClientCourier,
@@ -92,7 +96,7 @@ class ClientCourierDestinoUpdateSerializer(serializers.ModelSerializer):
 
 
     def validate_unique_usuario_destino(self, instance):
-        """Valida manualmente los campos únicos"""
+        #Valida manualmente los campos únicos
         errors = {}
         
         if ClienteUsuarioDestino.objects.exclude(pk=instance.pk).filter(identificacion=instance.identificacion).exists():
@@ -109,3 +113,4 @@ class ClientCourierDestinoUpdateSerializer(serializers.ModelSerializer):
 
 
 
+"""

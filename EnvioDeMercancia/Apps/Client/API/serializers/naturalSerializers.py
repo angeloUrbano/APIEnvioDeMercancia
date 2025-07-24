@@ -7,14 +7,270 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 
 
+# from EnvioDeMercancia.Apps.Client.models import (
+#     ClienteQuienEnvia,
+#     ClienteQuienRecibe, 
+#     ClientNatural,
+#     Direccion,
+# )
+
+
+
+
+
 from EnvioDeMercancia.Apps.Client.models import (
-    ClienteQuienEnvia,
-    ClienteQuienRecibe, 
-    ClientNatural,
-    Direccion
+    ClientNatural2,
+    Direccion2
 )
 
-from EnvioDeMercancia.Apps.Client.API.serializers.direccionesSerializers import DireccionSerializer ,DireccionSerializerEditar
+from EnvioDeMercancia.Apps.User.models import User
+from EnvioDeMercancia.Apps.Client.API.serializers.direccionesSerializers import( DireccionSerializer)
+
+
+
+#list Client Natural 2222222 ---------------------------------------->>>>>>>>>>>>>>>>>>>>>>>
+
+
+class AllUserAgent(serializers.ModelSerializer):
+    class Meta:
+        model= User
+        fields = [
+            "id" , "username", "email", "name", "second_name", 
+            "last_name", "secound_last_name",  "groups" 
+        ]
+
+
+class GeneralListClienNaturaltSerializers2(serializers.ModelSerializer):
+    Agente_relacionado = serializers.SerializerMethodField()
+    direcciones_cliente_natural = serializers.SerializerMethodField()
+
+    class Meta :
+        model=ClientNatural2
+        fields="__all__"
+
+    def get_Agente_relacionado(self , obj):
+        if obj.Agente_relacionado:
+            return AllUserAgent(obj.Agente_relacionado).data
+        return {}
+    
+
+    def get_direcciones_cliente_natural(self , obj):
+        direccines_data = DireccionSerializer.Meta.model.objects.filter(cliente_natural=obj)
+        if direccines_data:
+            return DireccionSerializer( direccines_data , many=True).data
+        return {}
+    
+
+
+
+class ClientNaturalCreateSerializer2(serializers.ModelSerializer):
+    direcciones_cliente_natural = DireccionSerializer(many=True)
+    agente_id = serializers.IntegerField(write_only=True, required=False)
+    Agente_relacionado = serializers.SerializerMethodField()
+
+    class Meta :
+        model=ClientNatural2
+        fields="__all__"
+
+
+    def validate_agente_id(self , value):
+        try:
+            agente = User.objects.get(pk=value)
+            if not agente.groups.filter(name="Agente").exists():
+                raise serializers.ValidationError("El usuario no pertence al grupo 'Agente'")
+            return value
+        except User.DoesNotExist:
+            raise serializers.ValidationError("Usuario no encontrado")
+
+    def get_Agente_relacionado(self , obj):
+        if obj.Agente_relacionado:
+            return AllUserAgent(obj.Agente_relacionado).data
+        return {}
+    
+
+    def get_cliente_natural(self , obj):
+        direccines_data = DireccionSerializer.Meta.model.objects.filter(cliente_natural=obj)
+        if direccines_data:
+            return DireccionSerializer( direccines_data , many=True).data
+        return {}
+    
+    @transaction.atomic
+    def create(self , validated_data):
+        direcciones_data = validated_data.pop("direcciones_cliente_natural" , [])
+        agente_id = validated_data.pop('agente_id', None)
+        instance = super().create(validated_data)
+
+        if agente_id:
+            agent = User.objects.get(pk=agente_id)
+            instance.Agente_relacionado = agent
+            instance.save()
+
+        for direccion in  direcciones_data:
+            Direccion2.objects.create(
+                cliente_natural=instance,
+                **direccion
+        )
+            
+        return instance
+    
+
+
+
+
+class ClientNaturalUpdateSerializer2(serializers.ModelSerializer):
+    direcciones_cliente_natural = DireccionSerializer(many=True)
+    agente_id = serializers.IntegerField(write_only=True, required=False)
+    Agente_relacionado = serializers.SerializerMethodField()
+
+    class Meta:
+        model=ClientNatural2
+        fields = "__all__"
+        extra_kwargs = {
+            'identificacion': {'validators': []},  # Desactiva validadores automáticos
+            'correo': {'validators': []},
+            'correo_aux': {'validators': []}
+        }
+
+    def get_Agente_relacionado(self , obj):
+        if obj.Agente_relacionado:
+            return AllUserAgent(obj.Agente_relacionado).data
+        return {}
+    
+    def validate_agente_id(self , value):
+        try:
+            agente = User.objects.get(pk=value)
+            if not agente.groups.filter(name="Agente").exists():
+                raise serializers.ValidationError("El usuario no pertence al grupo 'Agente'")
+            return value
+        except User.DoesNotExist:
+            raise serializers.ValidationError("Usuario no encontrado")
+
+    @transaction.atomic
+    def update(self, instance, validated_data):
+        direcciones_data = validated_data.pop("direcciones_cliente_natural", None)
+        agente_id = validated_data.pop('agente_id', None)
+        
+        # Validación manual de campos únicos
+        self._validate_unique_fields(instance, validated_data)
+        
+        cliente = super().update(instance, validated_data)
+
+        if direcciones_data is not None:
+            self._update_direcciones(instance, direcciones_data)
+
+            
+        if agente_id:
+            agent = User.objects.get(pk=agente_id)
+            cliente.Agente_relacionado = agent
+            cliente.save()
+
+        return cliente
+
+    def _validate_unique_fields(self, instance, validated_data):
+        errors = {}
+        
+        # Validar identificación
+        identificacion = validated_data.get('identificacion', instance.identificacion)
+        if ClientNatural.objects.exclude(pk=instance.pk).filter(identificacion=identificacion).exists():
+            errors['identificacion'] = ["Esta identificación ya está en uso"]
+        
+        # Validar correo
+        correo = validated_data.get('correo', instance.correo)
+        if ClientNatural.objects.exclude(pk=instance.pk).filter(correo=correo).exists():
+            errors['correo'] = ["Este correo ya está en uso"]
+        
+        # Validar correo auxiliar
+        correo_aux = validated_data.get('correo_aux', instance.correo_aux)
+        if correo_aux and ClientNatural.objects.exclude(pk=instance.pk).filter(correo_aux=correo_aux).exists():
+            errors['correo_aux'] = ["Este correo auxiliar ya está en uso"]
+        
+        if errors:
+            raise serializers.ValidationError(errors)
+
+    def _update_direcciones(self, instance, direcciones_data):
+        for dir_data in direcciones_data:
+            if 'id' in dir_data:
+                Direccion2.objects.filter(
+                    id=dir_data['id'],
+                    cliente_natural=instance
+                ).update(
+                    estado=dir_data.get('estado'),
+                    municipio=dir_data.get('municipio'),
+                    sector=dir_data.get('sector'),
+                    casa=dir_data.get('casa'),
+                    pais=dir_data.get('pais'),
+                    codigo_postal=dir_data.get('codigo_postal'),
+                    is_active=dir_data.get('is_active', True)
+                )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+"""
 
 
 
@@ -216,4 +472,4 @@ class ClientNaturalUpdateSerializer(serializers.ModelSerializer):
                     casa=dir_data.get('casa'),
                     is_active=dir_data.get('is_active', True)
                 )
-   
+   """

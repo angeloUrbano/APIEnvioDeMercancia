@@ -77,16 +77,18 @@ class RepositorioSQLUser(RepositorioUsarioEscritura , RepositorioUsarioLectura )
         except modelo.DoesNotExist:
             return {"success":False , "error": "user not found"}
         except Exception as e:
-            return {"success":False , "error": e}
+            return {"success":False , "error": str(e)}
      
     def UpdateUserRepositori(self  , modelo ,  pk ):
         try :
-            query = modelo.objects.filter(id=pk).first()      
-            return {"success":True , "result":query}
+            query = modelo.objects.filter(id=pk).first()
+            if query is not None:      
+                return {"success":True , "result":query}
+            return {"success":False , "error": "user not found"}
         except modelo.DoesNotExist:
             return {"success":False , "error": "user not found"}
         except Exception as e:
-            return {"success":False , "error": e}
+            return {"success":False , "error": str(e)}
         
     def GetOneUserRepositori(self , modelo ,  pk ):
         try:
@@ -95,7 +97,7 @@ class RepositorioSQLUser(RepositorioUsarioEscritura , RepositorioUsarioLectura )
         except modelo.DoesNotExist:
             return {"success":False , "error": "user not found"}
         except Exception as e:
-            return {"success":False , "error": e}
+            return {"success":False , "error": str(e)}
             
     def GetAllUsersRepositori(self , modelo):
         try:

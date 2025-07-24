@@ -1,7 +1,99 @@
 from rest_framework import serializers
-from EnvioDeMercancia.Apps.Client.models import ClienteUsuarioDestino , ClienteQuienEnvia , ClienteQuienRecibe , ClientNatural , Direccion
+#from EnvioDeMercancia.Apps.Client.models import ClienteUsuarioDestino , ClienteQuienEnvia , ClienteQuienRecibe , ClientNatural , Direccion
 
 
+
+from EnvioDeMercancia.Apps.Client.models import ClientNatural2
+
+
+
+
+class ClientNaturalHistoricalSerializer(serializers.ModelSerializer):
+
+
+    history_user = serializers.SerializerMethodField()
+    history_type_display = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = ClientNatural2.historical.model
+
+        fields = [
+            'history_id',
+            'nombre',
+            'segundo_nombre',
+            'apellido',
+            'segundo_apellido',
+            'identificacion',
+            'correo',
+            'correo_aux',
+            'telefono',
+            'telefono_aux',
+            'is_active',
+            'history_date',
+            'history_change_reason',
+            'history_type',
+            'history_type_display',
+            'history_user'
+        ]
+
+    def get_history_user(self, obj):
+      
+        if obj.history_user is not None:
+            return{
+                "usuario":obj.history_user.username,
+                "nombre": obj.history_user.name,
+                "apellido":obj.history_user.last_name,
+                "email":obj.history_user.email
+            }   
+        return None
+    
+
+    def get_history_type_display(self , obj):
+
+        return{
+            '+': 'Creación',
+            '~': 'Actualización',
+            '-': 'Eliminación'
+        }.get(obj.history_type, obj.history_type)
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+"""
 
 
 
@@ -260,11 +352,10 @@ class ClientCourierHistoricalSerializer(serializers.ModelSerializer):
 
 
 
-
-
 #---------------------------------------------------------------
 
 class DireccionHistoricalSerializer(serializers.ModelSerializer):
+
 
 
     history_user = serializers.SerializerMethodField()
@@ -312,3 +403,8 @@ class DireccionHistoricalSerializer(serializers.ModelSerializer):
             '~': 'Actualización',
             '-': 'Eliminación'
         }.get(obj.history_type, obj.history_type)
+
+
+
+
+"""

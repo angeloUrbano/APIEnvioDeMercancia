@@ -59,7 +59,7 @@ class GestionUserSerializersService(ServiceUsarioLectura , ServiceUsarioEscritur
                 return {"success":True , "info":serializer.data}
             return {"success":False , "infoFormulario":serializer.errors}
         except Exception as e:
-            return {"success":False , "infoServidor":e}
+            return {"success":False , "infoServidor":str(e)}
 
     def UpdateUserService(self  , serializerClass , user , requestData):
         try :
@@ -69,15 +69,15 @@ class GestionUserSerializersService(ServiceUsarioLectura , ServiceUsarioEscritur
                 return{"success":True , "info":serializer.data }
             return{"success":False , "infoFormulario":serializer.errors} 
         except Exception as e:
-            return{"success":False , "infoServidor":e} 
+            return{"success":False , "infoServidor":str(e)} 
         
     def GetOneUserService(self , serializerClass , user):
         try:
             if user:
                 return{"success":True , "info":serializerClass(user).data}
-            return{"success":False , "infoFormulario":serializerClass(user).errors} 
+            return{"success":False , "infoFormulario":serializerClass(user)} 
         except Exception as e:
-            return{"success":False , "infoServidor":e} 
+            return{"success":False , "infoServidor":str(e)} 
 
     def GetAllUsersService(self , serializer_class , users):
         allUsers = serializer_class(users, many=True)

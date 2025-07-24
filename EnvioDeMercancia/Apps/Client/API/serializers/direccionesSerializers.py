@@ -9,7 +9,7 @@ from django.db import transaction
 
 from EnvioDeMercancia.Apps.Client.models import (
 
-    Direccion
+    Direccion2
 )
 
 
@@ -19,15 +19,15 @@ from EnvioDeMercancia.Apps.Client.models import (
 
 # general de direcctiones
 class DireccionSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(required=False)# Hacemos el id opcional
     class Meta:
-        model=Direccion
+        model=Direccion2
         fields = "__all__"
         extra_kwargs = {
+            #'id': {'read_only': False},  # Esto es clave
             'cliente_natural': {'required': False},
-            'cliente_courier': {'required': False},
-            'cliente_quien_envia': {'required': False},
-            'cliente_quien_recibe': {'required': False},
-            'cliente_destino': {'required': False},
+            'Agente': {'required': False},
+            
         }
 
 
@@ -36,15 +36,13 @@ class DireccionSerializer(serializers.ModelSerializer):
 #porque para editar necesito el id
 class DireccionSerializerEditar(serializers.ModelSerializer):
     class Meta:
-        model = Direccion
+        model = Direccion2
         fields = "__all__"
         extra_kwargs = {
             'id': {'read_only': False},  # Esto es clave
             'cliente_natural': {'required': False, 'write_only': True},
-            'cliente_courier': {'required': False, 'write_only': True},
-            'cliente_quien_envia': {'required': False, 'write_only': True},
-            'cliente_quien_recibe': {'required': False, 'write_only': True},
-            'cliente_destino': {'required': False, 'write_only': True}
+            'Agente': {'required': False, 'write_only': True},
+
         }
 
 

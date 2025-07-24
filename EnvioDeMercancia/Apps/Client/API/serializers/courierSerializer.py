@@ -6,6 +6,11 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 
 
+"""
+
+
+
+
 from EnvioDeMercancia.Apps.Client.models import (
     ClienteUsuarioDestino, 
     ClientCourier,
@@ -48,30 +53,30 @@ class ClientCourierCreateSerializer(serializers.ModelSerializer):
     direcciones_cliente_courier = DireccionSerializer(many=True, required=True)  # Para direcciones del courier
     
     #IMPORTANTE DESPLEGAR Y LEER
-    """
-        como no se puede mapear una relacion entre clientecourier , direcciones y clienteDestino
-        a la hora de mostrar los campos una vez se hayan guardado,  implement serializers.SerializerMethodField()
-        lo que me permite utilizar  direcciones_destino para mostrar o serializer la informacion en el mismo serializer
-        ClientCourierCreateSerializer , cuando hago un get , "que es lo que se produce una vez se termina de guarda" , se llama
-        al metodo get_direcciones_destino()
+    
+        # como no se puede mapear una relacion entre clientecourier , direcciones y clienteDestino
+        # a la hora de mostrar los campos una vez se hayan guardado,  implement serializers.SerializerMethodField()
+        # lo que me permite utilizar  direcciones_destino para mostrar o serializer la informacion en el mismo serializer
+        # ClientCourierCreateSerializer , cuando hago un get , "que es lo que se produce una vez se termina de guarda" , se llama
+        # al metodo get_direcciones_destino()
 
 
-        nota: POR QUE NO PASA LO MISMO CON EL CAMPO direcciones ?: SE DEBE A QUE SI HAY UNA RELACION MAPEADA EN EL MODELO DIRECCIONES
-            cliente_courier = models.ForeignKey(
-                ClientCourier,
-                on_delete=models.CASCADE,
-                related_name="direcciones",
-                null=True,
-                blank=True
-            )
+        # nota: POR QUE NO PASA LO MISMO CON EL CAMPO direcciones ?: SE DEBE A QUE SI HAY UNA RELACION MAPEADA EN EL MODELO DIRECCIONES
+        #     cliente_courier = models.ForeignKey(
+        #         ClientCourier,
+        #         on_delete=models.CASCADE,
+        #         related_name="direcciones",
+        #         null=True,
+        #         blank=True
+        #     )
 
-         QUE RELACIONA DIRECTAMENTE CLIENT CURRIER CON DIRECCIONES A TRAVEZ DE  related_name , EL ERROR PASA CUANDO INTERBIENE clientDestino
+        #  QUE RELACIONA DIRECTAMENTE CLIENT CURRIER CON DIRECCIONES A TRAVEZ DE  related_name , EL ERROR PASA CUANDO INTERBIENE clientDestino
 
          
-        nota 2 : tambien pude haber hecho estoo : direcciones_destino = DireccionSerializer(many=True, write_only=True)
-        write_only=True es la clave.
+        # nota 2 : tambien pude haber hecho estoo : direcciones_destino = DireccionSerializer(many=True, write_only=True)
+        # write_only=True es la clave.
 
-    """
+    
     direcciones_destino = serializers.SerializerMethodField()
     
     class Meta:
@@ -88,14 +93,14 @@ class ClientCourierCreateSerializer(serializers.ModelSerializer):
         usuario_destino_data = validated_data.pop('usuario_destino')
         direcciones_courier_data = validated_data.pop('direcciones_cliente_courier' , [])
         #IMPORTANTE DESPLEGAR Y LEER
-        """
-        self.context['request'].data.get('direcciones_destino', []) es la informacion que viene del request , 
-        y le paso el request cuando uso el serializador  ClientCourierCreateSerializer en el ClientView para guardar
         
-        y no utilizo validated_data poruqe no es un campo declarado explicitamente asi que no pasa a la etapa que monta los datos 
-        en validated_data.
+        # self.context['request'].data.get('direcciones_destino', []) es la informacion que viene del request , 
+        # y le paso el request cuando uso el serializador  ClientCourierCreateSerializer en el ClientView para guardar
+        
+        # y no utilizo validated_data poruqe no es un campo declarado explicitamente asi que no pasa a la etapa que monta los datos 
+        # en validated_data.
 
-        """
+       
         direcciones_destino_data = self.context['request'].data.get('direcciones_destino', [])
 
         try:
@@ -184,3 +189,6 @@ class ClientCourierUpdateSerializer(serializers.ModelSerializer):
                             is_active=dir_data.get('is_active', True)
                         )
             
+                        
+
+"""
