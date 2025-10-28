@@ -4,9 +4,7 @@ from django.urls import path
 
 from EnvioDeMercancia.Apps.Client.API.views.AuditoriaClientViews import (AuditClietsView)
 
-
-
-from EnvioDeMercancia.Apps.Client.API.views.clientViews import ( GeneraListClients2  , GeneraListClientSEditarEliminarGet2)
+from EnvioDeMercancia.Apps.Client.API.views.clientViews import ( GeneraListClients  , GeneraListClientSEditarEliminarGet)
 
 
 
@@ -26,14 +24,10 @@ urlpatterns = [
     #auditoria de clientes
     path("AuditClients/" , AuditClietsView , name="auditClientsName"),
 
-    
-    path("AllClients2/" , GeneraListClients2.as_view() , name ="AllClientsName"),
+    #lista todos y crea
+    path("AllClients/" , GeneraListClients.as_view() , name ="AllClientsName"),
 
-    path("AllClients22/<int:pk>/" , GeneraListClientSEditarEliminarGet2.as_view() , name ="AllClientsName"),
-
-
-    
-    
-
+    #edita , elimina y lista uno solo . para los clientes bases
+    path("NaturalOrCourierRetrieve/<int:pk>/" , GeneraListClientSEditarEliminarGet.as_view() , name ="NaturalOrCourierRetriveName"),
     
 ]

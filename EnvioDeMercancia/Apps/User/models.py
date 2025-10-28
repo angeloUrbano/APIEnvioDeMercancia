@@ -11,29 +11,31 @@ from django.core.exceptions import ValidationError
 
 
 
-
 class UserManager(BaseUserManager):
-    def _create_user(self, username, email, name,last_name, password, is_staff, is_superuser, **extra_fields):
+    def _create_user(self, username, email, name, last_name, password, is_staff, is_superuser, groups=None, **extra_fields):
         user = self.model(
-            username = username,
-            email = email,
-            name = name,
-            last_name = last_name,
-            is_staff = is_staff,
-            is_superuser = is_superuser,
+            username=username,
+            email=email,
+            name=name,
+            last_name=last_name,
+            is_staff=is_staff,
+            is_superuser=is_superuser,
             **extra_fields
         )
         user.set_password(password)
         user.save(using=self.db)
+        
+        # Si se proporcionan grupos, los asignamos al usuario
+        if groups:
+            user.groups.set(groups)
+            
         return user
 
-    def create_user(self, username, email, name,last_name, password=None, groups=None  , **extra_fields):
-        return self._create_user(username, email, name,last_name, password, False, False, groups ,  **extra_fields)
+    def create_user(self, username, email, name, last_name, password=None, groups=None, **extra_fields):
+        return self._create_user(username, email, name, last_name, password, False, False, groups, **extra_fields)
 
-    def create_superuser(self, username, email, name,last_name, password=None, groups=None , **extra_fields):
-        return self._create_user(username, email, name,last_name, password, True, True, groups , **extra_fields)
-
-
+    def create_superuser(self, username, email, name, last_name, password=None, groups=None, **extra_fields):
+        return self._create_user(username, email, name, last_name, password, True, True, groups, **extra_fields)
 
 """
 segundo nombre y segundo apellido

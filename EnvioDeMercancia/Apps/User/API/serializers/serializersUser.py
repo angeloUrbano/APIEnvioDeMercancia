@@ -10,7 +10,7 @@ from django.db import transaction
 
 from EnvioDeMercancia.Apps.Client.API.serializers.direccionesSerializers import DireccionSerializer , DireccionSerializerEditar
 
-from EnvioDeMercancia.Apps.Client.models import Direccion2
+from EnvioDeMercancia.Apps.Client.models import Direccion
 class CustomTokenObtainPairSerilizer(TokenObtainPairSerializer):
     pass
 
@@ -106,7 +106,7 @@ class userSerilizerCreate(serializers.ModelSerializer):
         user.save()
 
         for direccion_data in direccion:
-            Direccion2.objects.create(
+            Direccion.objects.create(
                 user=user,
                 **direccion_data
         )
@@ -152,7 +152,7 @@ class userSerilizerCreate(serializers.ModelSerializer):
 
         for dir_data in direcciones_data:
             if 'id' in dir_data:  # Ahora el ID estará presente
-                Direccion2.objects.filter(
+                Direccion.objects.filter(
                     id=dir_data['id'],
                     user=instance
                 ).update(
@@ -211,7 +211,6 @@ class userSerilizerUpdate(serializers.ModelSerializer):
         
 
         if direcciones_data is not None:
-            print("si se esta intentando editar el usuario")
             self._update_direcciones(instance, direcciones_data)
         
         instance.save()
@@ -231,7 +230,7 @@ class userSerilizerUpdate(serializers.ModelSerializer):
         
         for dir_data in direcciones_data:
             if 'id' in dir_data:  # Ahora el ID estará presente
-                Direccion2.objects.filter(
+                Direccion.objects.filter(
                     id=dir_data['id'],
                     user=instance
                 ).update(

@@ -6,7 +6,7 @@
 
 
 from EnvioDeMercancia.Apps.Client.models import (
-    ClientNatural2,
+    ClientNatural
 )
 
 
@@ -43,19 +43,19 @@ from EnvioDeMercancia.Apps.Client.models import (
 
 
 
-class ClienteRepository2 :
+class ClienteRepository :
 
     @staticmethod
     def get_all_Clients():
-        return ClientNatural2.objects.all() 
+        return ClientNatural.objects.all() 
 
     @staticmethod
     def create_Client(data):
-        return ClientNatural2.objects.create(**data)
+        return ClientNatural.objects.create(**data)
     
     @staticmethod
     def get_client(data):
-        return ClientNatural2.objects.filter(id=data).first()
+        return ClientNatural.objects.filter(id=data).first()
 
     
 

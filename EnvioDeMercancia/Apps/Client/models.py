@@ -152,7 +152,7 @@ el que maneja esa informacion que no edite , solo puede eliminar ya que el clien
 
 
 #this client is not a company
-class ClientNatural2(models.Model):
+class ClientNatural(models.Model):
     nombre = models.CharField(verbose_name='Nombre del cliente',max_length = 150, blank= False, null=False)
     segundo_nombre = models.CharField(verbose_name='Segundo Nombre del cliente',max_length = 150, blank= True, null=True)
     segundo_apellido = models.CharField(verbose_name='Segundo Apellido del cliente',max_length = 150, blank= True, null=True)
@@ -194,7 +194,7 @@ class ClientNatural2(models.Model):
 
 
 
-class Direccion2(models.Model):
+class Direccion(models.Model):
     pais = models.CharField(verbose_name='Pais',max_length = 150, blank= False, null=False)
     estado = models.CharField(verbose_name='Estado', max_length=150, blank=False, null=False)
     municipio = models.CharField(verbose_name='Municipio', max_length=150, blank=False, null=False)
@@ -204,7 +204,7 @@ class Direccion2(models.Model):
 
     #Relaciones opcionales
     cliente_natural = models.ForeignKey(
-        ClientNatural2,
+        ClientNatural,
         on_delete=models.CASCADE,
         related_name="direcciones_cliente_natural",
         null=True,

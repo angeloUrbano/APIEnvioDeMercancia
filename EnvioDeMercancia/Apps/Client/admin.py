@@ -14,8 +14,8 @@ from django.contrib import admin
 
 
 from EnvioDeMercancia.Apps.Client.models import (
-    ClientNatural2,
-    Direccion2
+    ClientNatural,
+    Direccion
 
 
 )
@@ -33,8 +33,8 @@ from EnvioDeMercancia.Apps.Client.models import (
 
 
 
-admin.site.register(ClientNatural2)
-admin.site.register(Direccion2)
+admin.site.register(ClientNatural)
+admin.site.register(Direccion)
 
 
 

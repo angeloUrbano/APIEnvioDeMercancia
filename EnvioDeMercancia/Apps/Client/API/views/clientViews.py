@@ -30,7 +30,7 @@ from django.core.exceptions import ValidationError
 #from EnvioDeMercancia.Apps.Client.API.SOLID.service import ClienteService , ClienteRelacionadosService , ClienteService2
 
 
-from EnvioDeMercancia.Apps.Client.API.SOLID.service import  ClienteService2
+from EnvioDeMercancia.Apps.Client.API.SOLID.service import  ClienteService
 
 
 
@@ -48,11 +48,11 @@ class CustomAPIException(APIException):
 
 
 
-class GeneraListClients2(APIView):
+class GeneraListClients(APIView):
 
 
     def __init__(self):
-        self.service = ClienteService2()
+        self.service = ClienteService()
 
     def get (self , request):
 
@@ -67,7 +67,6 @@ class GeneraListClients2(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
     
-
 
     def post(self, request, *args, **kwargs):
 
@@ -104,7 +103,7 @@ class GeneraListClients2(APIView):
             return Response({'error': str(e.detail)}, status=e.status_code)
         except Exception as e:
             return Response(
-                {'error': 'Error interno del servidor al crear cliente'},
+                {'error': f'{"Error interno del servidor al crear cliente"} {str(e)}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
         
@@ -116,10 +115,10 @@ class GeneraListClients2(APIView):
 
 
         
-class GeneraListClientSEditarEliminarGet2(APIView):
+class GeneraListClientSEditarEliminarGet(APIView):
 
     def __init__(self):
-        self.service = ClienteService2()
+        self.service = ClienteService()
         
 
     def put(self, request, *args, **kwargs):

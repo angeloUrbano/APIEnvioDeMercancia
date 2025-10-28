@@ -9,7 +9,7 @@ from django.db import transaction
 
 from EnvioDeMercancia.Apps.Client.models import (
 
-    Direccion2
+    Direccion
 )
 
 
@@ -21,7 +21,7 @@ from EnvioDeMercancia.Apps.Client.models import (
 class DireccionSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(required=False)# Hacemos el id opcional
     class Meta:
-        model=Direccion2
+        model=Direccion
         fields = "__all__"
         extra_kwargs = {
             #'id': {'read_only': False},  # Esto es clave
@@ -36,7 +36,7 @@ class DireccionSerializer(serializers.ModelSerializer):
 #porque para editar necesito el id
 class DireccionSerializerEditar(serializers.ModelSerializer):
     class Meta:
-        model = Direccion2
+        model = Direccion
         fields = "__all__"
         extra_kwargs = {
             'id': {'read_only': False},  # Esto es clave

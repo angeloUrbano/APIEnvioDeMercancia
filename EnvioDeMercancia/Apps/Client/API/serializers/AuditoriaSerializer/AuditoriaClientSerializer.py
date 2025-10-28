@@ -3,7 +3,7 @@ from rest_framework import serializers
 
 
 
-from EnvioDeMercancia.Apps.Client.models import ClientNatural2
+from EnvioDeMercancia.Apps.Client.models import ClientNatural
 
 
 
@@ -15,7 +15,7 @@ class ClientNaturalHistoricalSerializer(serializers.ModelSerializer):
     history_type_display = serializers.SerializerMethodField()
     
     class Meta:
-        model = ClientNatural2.historical.model
+        model = ClientNatural.historical.model
 
         fields = [
             'history_id',

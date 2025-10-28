@@ -45,8 +45,8 @@ from django.core.exceptions import ValidationError
 
 from EnvioDeMercancia.Apps.Client.API.serializers.naturalSerializers import  (
                                                                               
-GeneralListClienNaturaltSerializers2 , ClientNaturalCreateSerializer2,
-ClientNaturalUpdateSerializer2)
+GeneralListClienNaturaltSerializers , ClientNaturalCreateSerializer,
+ClientNaturalUpdateSerializer)
 
 
 
@@ -58,9 +58,9 @@ from EnvioDeMercancia.Apps.Client.API.serializers.AuditoriaSerializer.AuditoriaC
 #from EnvioDeMercancia.Apps.Client.API.SOLID.repositories import ClienteRepository , ClienteRepository2 
 
 
-from EnvioDeMercancia.Apps.Client.API.SOLID.repositories import ClienteRepository2 
+from EnvioDeMercancia.Apps.Client.API.SOLID.repositories import ClienteRepository
 
-from EnvioDeMercancia.Apps.Client.models import ClientNatural2
+from EnvioDeMercancia.Apps.Client.models import ClientNatural
 
 
 # from EnvioDeMercancia.Apps.Client.API.serializers.AuditoriaSerializer.AuditoriaClientSerializer import (
@@ -163,15 +163,15 @@ class CustomAPIException(APIException):
 
 
 
-class ClienteService2:
+class ClienteService:
     def __init__(self):
-        self.repository = ClienteRepository2()
+        self.repository = ClienteRepository()
 
     def list_all_clients(self):
 
         try:
             all_clients = self.repository.get_all_Clients()
-            serializer = GeneralListClienNaturaltSerializers2(all_clients, many=True)
+            serializer = GeneralListClienNaturaltSerializers(all_clients, many=True)
             return serializer.data
         except Exception as e:
             raise CustomAPIException(
@@ -182,7 +182,7 @@ class ClienteService2:
 
     def create_client(self, data):
         try:
-            serializer = ClientNaturalCreateSerializer2(data=data)
+            serializer = ClientNaturalCreateSerializer(data=data)
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return serializer.data
@@ -211,7 +211,7 @@ class ClienteService2:
                     status_code=status.HTTP_404_NOT_FOUND
                 )
         
-            serializer = ClientNaturalUpdateSerializer2(instance=client , data=update_data)
+            serializer = ClientNaturalUpdateSerializer(instance=client , data=update_data)
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return serializer.data
@@ -238,7 +238,7 @@ class ClienteService2:
                     detail='Cliente no encontrado',
                     status_code=status.HTTP_404_NOT_FOUND
                 )
-            serializer =GeneralListClienNaturaltSerializers2(client)
+            serializer =GeneralListClienNaturaltSerializers(client)
             return serializer.data
         
         except ValidationError as e:
@@ -266,7 +266,7 @@ class AudicotiriaClientsService:
     
     TYPE_MODEL_CONFIG={
         "natural":{
-            "model":ClientNatural2,
+            "model":ClientNatural,
             "serializer":ClientNaturalHistoricalSerializer,
         }
     }

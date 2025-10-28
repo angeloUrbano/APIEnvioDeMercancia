@@ -19,8 +19,8 @@ from django.db import transaction
 
 
 from EnvioDeMercancia.Apps.Client.models import (
-    ClientNatural2,
-    Direccion2
+    ClientNatural,
+    Direccion
 )
 
 from EnvioDeMercancia.Apps.User.models import User
@@ -28,7 +28,7 @@ from EnvioDeMercancia.Apps.Client.API.serializers.direccionesSerializers import(
 
 
 
-#list Client Natural 2222222 ---------------------------------------->>>>>>>>>>>>>>>>>>>>>>>
+#list Client Natural ---------------------------------------->>>>>>>>>>>>>>>>>>>>>>>
 
 
 class AllUserAgent(serializers.ModelSerializer):
@@ -40,12 +40,12 @@ class AllUserAgent(serializers.ModelSerializer):
         ]
 
 
-class GeneralListClienNaturaltSerializers2(serializers.ModelSerializer):
+class GeneralListClienNaturaltSerializers(serializers.ModelSerializer):
     Agente_relacionado = serializers.SerializerMethodField()
     direcciones_cliente_natural = serializers.SerializerMethodField()
 
     class Meta :
-        model=ClientNatural2
+        model=ClientNatural
         fields="__all__"
 
     def get_Agente_relacionado(self , obj):
@@ -63,13 +63,13 @@ class GeneralListClienNaturaltSerializers2(serializers.ModelSerializer):
 
 
 
-class ClientNaturalCreateSerializer2(serializers.ModelSerializer):
+class ClientNaturalCreateSerializer(serializers.ModelSerializer):
     direcciones_cliente_natural = DireccionSerializer(many=True)
     agente_id = serializers.IntegerField(write_only=True, required=False)
     Agente_relacionado = serializers.SerializerMethodField()
 
     class Meta :
-        model=ClientNatural2
+        model=ClientNatural
         fields="__all__"
 
 
@@ -106,7 +106,7 @@ class ClientNaturalCreateSerializer2(serializers.ModelSerializer):
             instance.save()
 
         for direccion in  direcciones_data:
-            Direccion2.objects.create(
+            Direccion.objects.create(
                 cliente_natural=instance,
                 **direccion
         )
@@ -117,13 +117,13 @@ class ClientNaturalCreateSerializer2(serializers.ModelSerializer):
 
 
 
-class ClientNaturalUpdateSerializer2(serializers.ModelSerializer):
+class ClientNaturalUpdateSerializer(serializers.ModelSerializer):
     direcciones_cliente_natural = DireccionSerializer(many=True)
     agente_id = serializers.IntegerField(write_only=True, required=False)
     Agente_relacionado = serializers.SerializerMethodField()
 
     class Meta:
-        model=ClientNatural2
+        model=ClientNatural
         fields = "__all__"
         extra_kwargs = {
             'identificacion': {'validators': []},  # Desactiva validadores automáticos
@@ -190,7 +190,7 @@ class ClientNaturalUpdateSerializer2(serializers.ModelSerializer):
     def _update_direcciones(self, instance, direcciones_data):
         for dir_data in direcciones_data:
             if 'id' in dir_data:
-                Direccion2.objects.filter(
+                Direccion.objects.filter(
                     id=dir_data['id'],
                     cliente_natural=instance
                 ).update(
